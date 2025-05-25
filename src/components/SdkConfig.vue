@@ -21,7 +21,8 @@ export default defineComponent({
     return {
       hostname: "",
       sdkUrl: "",
-      isIgnoreCsp: true
+      isIgnoreCsp: true,
+      isEnableThirdPartyCookies: true
     }
   },
 
@@ -34,6 +35,7 @@ export default defineComponent({
       .then((value: any) => {
         this.sdkUrl = value?.sdkUrl || ''
         this.isIgnoreCsp = value?.isIgnoreCsp === false ? false : true
+        this.isEnableThirdPartyCookies = value?.isEnableThirdPartyCookies === false ? false : true
       })
   },
 
@@ -41,7 +43,8 @@ export default defineComponent({
     saveSdkConfig() {
       setStorageValue(this.storageKey, {
         sdkUrl: this.sdkUrl,
-        isIgnoreCsp: this.isIgnoreCsp
+        isIgnoreCsp: this.isIgnoreCsp,
+        isEnableThirdPartyCookies: this.isEnableThirdPartyCookies
       })
 
       injectSdk(this.sdkUrl)
@@ -71,14 +74,24 @@ export default defineComponent({
   </div>
 
   <div class="buttons is-right">
-        <div class="buttons has-addons is-small">
-        <button class="button is-small" disabled>Disable CSP rules</button>
-        <button :class="{ 'button is-small': true, 'is-selected is-success': isIgnoreCsp }"
-          @click="isIgnoreCsp = true">Yes</button>
-        <button :class="{ 'button is-small': true, 'is-selected is-danger': !isIgnoreCsp }"
-          @click="isIgnoreCsp = false">No</button>
-      </div>
-</div>
+    <div class="buttons has-addons is-small">
+      <button class="button is-small" disabled>Disable CSP rules</button>
+      <button :class="{ 'button is-small': true, 'is-selected is-success': isIgnoreCsp }"
+        @click="isIgnoreCsp = true">Yes</button>
+      <button :class="{ 'button is-small': true, 'is-selected is-danger': !isIgnoreCsp }"
+        @click="isIgnoreCsp = false">No</button>
+    </div>
+  </div>
+
+  <div class="buttons is-right">
+    <div class="buttons has-addons is-small">
+      <button class="button is-small" disabled>Enable 3Party Cookies</button>
+      <button :class="{ 'button is-small': true, 'is-selected is-success': isEnableThirdPartyCookies }"
+        @click="isEnableThirdPartyCookies = true">Yes</button>
+      <button :class="{ 'button is-small': true, 'is-selected is-danger': !isEnableThirdPartyCookies }"
+        @click="isEnableThirdPartyCookies = false">No</button>
+    </div>
+  </div>
 </template>
 
 <style scoped></style>
