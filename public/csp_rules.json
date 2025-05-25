@@ -1,0 +1,31 @@
+[
+    {
+        "id": 1,
+        "priority": 1,
+        "action": {
+            "type": "modifyHeaders",
+            "responseHeaders": [
+                {
+                    "header": "Content-Security-Policy",
+                    "operation": "remove"
+                },
+                {
+                    "operation": "remove",
+                    "header": "Content-Security-Policy-Report-Only"
+                },
+                {
+                    "operation": "set",
+                    "header": "Content-Security-Policy",
+                    "value": "default-src 'self' https://trusted.cdn.com; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.c360a.salesforce.com; object-src 'none';"
+                }
+            ]
+        },
+        "condition": {
+            "urlFilter": "<all_urls>",
+            "resourceTypes": [
+                "main_frame",
+                "sub_frame"
+            ]
+        }
+    }
+]

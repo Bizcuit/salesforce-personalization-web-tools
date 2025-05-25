@@ -1,0 +1,34 @@
+{
+  "name": "WPM Launcher",
+  "description": "Launcher for Salesforce Web Personalization Manager",
+  "version": "1.0",
+  "manifest_version": 3,
+  "action": {
+    "default_popup": "index.html",
+    "default_icon": "icon.png"
+  },
+  "permissions": [
+    "declarativeNetRequestWithHostAccess",
+    "scripting",
+    "activeTab",
+    "storage",
+    "downloads",
+    "webRequest",
+    "contentSettings"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "declarative_net_request": {
+    "rule_resources": [
+      {
+        "id": "csp_rules",
+        "enabled": true,
+        "path": "csp_rules.json"
+      }
+    ]
+  }
+}
