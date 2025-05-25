@@ -85,7 +85,7 @@ export default defineComponent({
 
   <div class="buttons is-right">
     <div class="buttons has-addons is-small">
-      <button class="button is-small" disabled>Enable 3Party Cookies</button>
+      <button class="button is-small" disabled>Enable Third Party Cookies</button>
       <button :class="{ 'button is-small': true, 'is-selected is-success': isEnableThirdPartyCookies }"
         @click="isEnableThirdPartyCookies = true">Yes</button>
       <button :class="{ 'button is-small': true, 'is-selected is-danger': !isEnableThirdPartyCookies }"
