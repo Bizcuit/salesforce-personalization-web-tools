@@ -6,6 +6,7 @@ import SdkConfig from './components/SdkConfig.vue'
 <script lang="ts">
 import { defineComponent } from 'vue'
 import { launchWPM } from './classes/Utils';
+import EventsList from './components/EventsList.vue';
 
 export default defineComponent({
   data() {
@@ -24,6 +25,7 @@ export default defineComponent({
         <ul>
           <li :class="{'is-active': tab == 'sitemap'}"><a @click="tab = 'sitemap'">Sitemap</a></li>
           <li :class="{'is-active': tab == 'sdk'}"><a @click="tab = 'sdk'">SDK</a></li>
+          <li :class="{'is-active': tab == 'events'}"><a @click="tab = 'events'">Events</a></li>
           <li class=""><a @click="launchWPM()">WPM ⏵</a></li>
         </ul>
       </div>
@@ -35,6 +37,10 @@ export default defineComponent({
 
     <div class="block" v-if="tab == 'sdk'">
       <SdkConfig></SdkConfig>
+    </div>
+
+    <div class="block" v-if="tab == 'events'">
+      <EventsList></EventsList>
     </div>
 
   </div>

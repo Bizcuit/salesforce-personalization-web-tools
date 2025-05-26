@@ -24,6 +24,7 @@ export default defineComponent({
       isEditingPageType: false,
       currentPageTypeName: '',
       currentPageType: this.newPageType(),
+      currentSitemap: '',
       pageConfigs: [] as Array<PageType>
     }
   },
@@ -47,9 +48,9 @@ export default defineComponent({
 
   methods: {
     downloadSitemap() {
-      const sitemap = generateSitemap(this.pageConfigs)
-      downloadTextFile(`sitemap.${this.hostname}.txt`, sitemap)
-      console.log(sitemap)
+      this.currentSitemap = generateSitemap(this.pageConfigs)
+      downloadTextFile(`sitemap.${this.hostname}.txt`, this.currentSitemap)
+      console.log(this.currentSitemap)
     },
 
     addPageType(pageType: string) {
@@ -87,15 +88,21 @@ export default defineComponent({
       setStorageValue(
         this.storageKey,
         {
-          pageConfigs: JSON.stringify(this.pageConfigs)
+          pageConfigs: JSON.stringify(this.pageConfigs),
+          sitemap: generateSitemap(this.pageConfigs)
         }
       )
     },
 
     async loadSdkConfig() {
       const config = await getStorageValue(this.storageKey)
+      
       if (config?.pageConfigs) {
         this.pageConfigs.push(...JSON.parse(config.pageConfigs))
+      }
+
+      if(config?.sitemap){
+        this.currentSitemap = config?.sitemap
       }
     },
 

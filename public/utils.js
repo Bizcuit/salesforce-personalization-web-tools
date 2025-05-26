@@ -27,6 +27,21 @@ export async function getWebsiteConfig(hostname) {
     return config
 }
 
+export async function getSitemapConfig(hostname) {
+    if (!hostname) throw new Error('Hostname not defined, cant receive config')
+
+    const storageKey = hostname + '_pageConfigs'
+
+    const configs = await chrome.storage.local.get([storageKey])
+
+    if (!configs?.[storageKey]) return null
+
+    const config = typeof configs?.[storageKey] === 'string' ? JSON.parse(configs?.[storageKey]) : configs?.[storageKey]
+
+    return config
+}
+
+
 export async function getHostnameByTab(tab) {
     if (!tab?.url) return null
 
@@ -42,6 +57,50 @@ export async function execScriptInTab(tab, clientFunction, args) {
     })
 
     console.log('Client script executed')
+}
+
+export function getEventsFromRequest(requestDetails){
+    try {
+        if (requestDetails?.method === "GET") {
+            console.log("GET URL:", requestDetails.url)
+        }
+        else if (requestDetails?.method === "POST" && requestDetails?.requestBody?.formData?.event) {
+            return JSON.parse(atob(requestDetails?.requestBody?.formData?.event))?.events || []
+        }
+    }
+    catch (err) {
+        console.log("Error capturing DC events", err)
+    }
+
+    return []
+}
+
+export async function getEventsFromStorage(hostname){
+    if (!hostname) throw new Error('Hostname not defined, cant receive events')
+
+    const storageKey = hostname + '_events'
+
+    const events = await chrome.storage.local.get([storageKey])
+
+    return events?.[storageKey] ? JSON.parse(events[storageKey]) : []
+}
+
+export async function addEventsToStorage(hostname, events){
+    if (!hostname) throw new Error('Hostname not defined, cant receive events')
+
+    const storageKey = hostname + '_events'
+    let storedEvents = await getEventsFromStorage(hostname)
+
+    storedEvents.unshift(...events)
+
+    if(storedEvents.length > 50){
+        storedEvents.splice(50)
+    }
+
+    const stringValue = JSON.stringify(storedEvents)
+
+    return chrome.storage.local
+        .set({ [storageKey]: stringValue })
 }
 
 export function injectClientSDK(url) {

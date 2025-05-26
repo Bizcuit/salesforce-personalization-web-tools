@@ -233,7 +233,6 @@ export default defineComponent({
         </tr>
       </tbody>
     </table>
-
   </div>
 
 

@@ -22,7 +22,8 @@ export default defineComponent({
       hostname: "",
       sdkUrl: "",
       isIgnoreCsp: true,
-      isEnableThirdPartyCookies: true
+      isEnableThirdPartyCookies: true,
+      isAutoInitSitemap: true
     }
   },
 
@@ -36,6 +37,7 @@ export default defineComponent({
         this.sdkUrl = value?.sdkUrl || ''
         this.isIgnoreCsp = value?.isIgnoreCsp === false ? false : true
         this.isEnableThirdPartyCookies = value?.isEnableThirdPartyCookies === false ? false : true
+        this.isAutoInitSitemap = value?.isAutoInitSitemap === false ? false : true
       })
   },
 
@@ -44,7 +46,8 @@ export default defineComponent({
       setStorageValue(this.storageKey, {
         sdkUrl: this.sdkUrl,
         isIgnoreCsp: this.isIgnoreCsp,
-        isEnableThirdPartyCookies: this.isEnableThirdPartyCookies
+        isEnableThirdPartyCookies: this.isEnableThirdPartyCookies,
+        isAutoInitSitemap: this.isAutoInitSitemap
       })
 
       injectSdk(this.sdkUrl)
@@ -90,6 +93,16 @@ export default defineComponent({
         @click="isEnableThirdPartyCookies = true">Yes</button>
       <button :class="{ 'button is-small': true, 'is-selected is-danger': !isEnableThirdPartyCookies }"
         @click="isEnableThirdPartyCookies = false">No</button>
+    </div>
+  </div>
+
+  <div class="buttons is-right">
+    <div class="buttons has-addons is-small">
+      <button class="button is-small" disabled>Auto Initialize Configured Sitemap</button>
+      <button :class="{ 'button is-small': true, 'is-selected is-success': isAutoInitSitemap }"
+        @click="isAutoInitSitemap = true">Yes</button>
+      <button :class="{ 'button is-small': true, 'is-selected is-danger': !isAutoInitSitemap }"
+        @click="isAutoInitSitemap = false">No</button>
     </div>
   </div>
 </template>
