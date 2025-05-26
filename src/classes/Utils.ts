@@ -80,7 +80,7 @@ export function launchWPM(){
 }
 
 export async function injectSdk(sdkUrl: string, sitemap: string) {
-    return await executeScript(url => {
+    return await executeScript((url, sitemap) => {
         const script = document.createElement('script');
         script.src = url;
 
@@ -97,7 +97,7 @@ export async function injectSdk(sdkUrl: string, sitemap: string) {
         };
 
         document.body.appendChild(script);        
-    }, [sdkUrl])
+    }, [sdkUrl, sitemap])
 }
 
 async function executeScript(clientFunction: Function, args: Array<any>) {
