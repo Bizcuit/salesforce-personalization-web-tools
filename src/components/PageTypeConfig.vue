@@ -52,8 +52,12 @@ export default defineComponent({
   },
 
   methods: {
-    saveAndClose() {
+    save(){
       this.$emit('save', this.currentPageType)
+    },
+
+    saveAndClose() {
+      this.save()
       this.$emit('close')
     },
 
@@ -69,6 +73,8 @@ export default defineComponent({
           pagePath: pagePath,
           catalogId: pagePath.replace(/[\/\.]/gi, "-").replace(/^-*/gi, '').replace(/-*$/gi, '')
         })
+
+        this.save()
       }
     },
 
