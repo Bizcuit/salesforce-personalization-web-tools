@@ -1,15 +1,17 @@
-import { 
-
-    enableThirdPartyCookies, 
-    execScriptInTab, 
-    getCurrentTab, 
-    getHostnameByTab, 
-    getWebsiteConfig, 
-    injectClientSDK, 
-    updateCspRules,
-    addEventsToStorage, 
+import {
+    enableThirdPartyCookies,
+    execScriptInTab,
+    getCurrentTab,
+    getHostnameByTab,
+    getWebsiteConfig,
+    injectClientSDK,
+    addEventsToStorage,
     getEventsFromRequest,
-    getSitemapConfig
+    getSitemapConfig,
+    getCspDisableRule,
+    resetNetworksRules,
+    getEvgDisableRule,
+    displayExtensionState
 } from "./utils.js"
 
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
@@ -23,15 +25,15 @@ chrome.tabs.onActivated.addListener((activeInfo) => {
 })
 
 chrome.webRequest.onBeforeRequest.addListener(async (requestDetails) => {
-        const tab = await getCurrentTab()
-        const hostname = await getHostnameByTab(tab)
-        const config = await getWebsiteConfig(hostname)        
+    const tab = await getCurrentTab()
+    const hostname = await getHostnameByTab(tab)
+    const config = await getWebsiteConfig(hostname)
 
-        if(config){
-            const events = getEventsFromRequest(requestDetails)
-            addEventsToStorage(hostname, events)
-        }
-    },
+    if (config) {
+        const events = getEventsFromRequest(requestDetails)
+        addEventsToStorage(hostname, events)
+    }
+},
     { urls: ["https://*.c360a.salesforce.com/web/events/*"] },
     ["requestBody"]
 )
@@ -47,13 +49,29 @@ async function processTab(tab) {
         const hostname = await getHostnameByTab(tab)
         const config = await getWebsiteConfig(hostname)
 
-        if (!config) {
-            console.log('Config not found for the hostname', hostname)
-            return
-        }
+        resetNetworksRules()
+        displayExtensionState(config)
+
+        if (!config) return
 
         if (config?.isIgnoreCsp) {
-            await updateCspRules(hostname)
+            console.log("getCspDisableRule()", getCspDisableRule())
+            const rule = getCspDisableRule(hostname)
+
+            await chrome.declarativeNetRequest.updateSessionRules({
+                addRules: [rule],
+                removeRuleIds: [rule.id]
+            })
+        }
+
+        if (config?.isBlockEvergage) {
+            console.log("getEvgDisableRule()", getEvgDisableRule())
+            const rule = getEvgDisableRule()
+
+            await chrome.declarativeNetRequest.updateSessionRules({
+                addRules: [rule],
+                removeRuleIds: [rule.id]
+            })
         }
 
         if (config?.isEnableThirdPartyCookies) {
@@ -64,12 +82,12 @@ async function processTab(tab) {
             await execScriptInTab(tab, injectClientSDK, [config?.sdkUrl])
         }
 
-        if(config?.isAutoInitSitemap){
+        if (config?.isAutoInitSitemap) {
             const sitemapConfig = await getSitemapConfig(hostname)
-            
-            if(sitemapConfig?.sitemap){
+
+            if (sitemapConfig?.sitemap) {
                 await execScriptInTab(tab, (sitemap) => {
-                    if(window.SalesforceInteractions){
+                    if (window.SalesforceInteractions) {
                         eval(sitemap)
                     }
                 }, [sitemapConfig?.sitemap])

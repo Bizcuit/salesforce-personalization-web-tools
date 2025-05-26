@@ -79,13 +79,18 @@ export function launchWPM(){
     }, [])
 }
 
-export async function injectSdk(sdkUrl: string) {
+export async function injectSdk(sdkUrl: string, sitemap: string) {
     return await executeScript(url => {
         const script = document.createElement('script');
         script.src = url;
 
         script.onload = () => {
             console.log(`Script ${url} loaded successfully!`);
+
+            if(sitemap){
+                console.log(`Initializing sitemap`);
+                eval(sitemap)
+            }
         };
         script.onerror = () => {
             console.error(`Error loading script ${url}`);

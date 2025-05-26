@@ -1,3 +1,66 @@
+export function getCspDisableRule(hostname){
+    return {
+        "id": 1,
+        "priority": 1,
+        "action": {
+            "type": "modifyHeaders",
+            "responseHeaders": [
+                {
+                    "header": "Content-Security-Policy",
+                    "operation": "remove"
+                },
+                {
+                    "operation": "remove",
+                    "header": "Content-Security-Policy-Report-Only"
+                }
+            ]
+        },
+        "condition": {
+            "urlFilter": `*://${hostname}/*`,
+            "resourceTypes": [
+                "main_frame",
+                "sub_frame"
+            ]
+        }
+    }
+}
+
+export function getEvgDisableRule(){
+    return {
+        id: 2,
+        priority: 1,
+        action: { type: "block" },
+        condition: {
+            urlFilter: "https://cdn.evgnet.com/*",
+        }
+    }
+}
+
+export async function resetNetworksRules(){
+    await chrome.declarativeNetRequest.updateSessionRules({ 
+        removeRuleIds: [
+            getCspDisableRule().id,
+            getEvgDisableRule().id
+        ]
+    })   
+}
+
+export async function displayExtensionState(isActive){
+    if (isActive) {
+        chrome.action.setTitle({ title: `Configured for this domain` });
+
+        chrome.action.setIcon({
+            path: { 128: 'icon-on.png' }
+        });
+    }
+    else {
+        chrome.action.setTitle({ title: `Not configured` });
+
+        chrome.action.setIcon({
+            path: { 128: 'icon-off.png' }
+        });
+    }
+}
 
 export function enableThirdPartyCookies(hostname) {
     chrome.contentSettings.cookies.set({
@@ -14,7 +77,7 @@ export function enableThirdPartyCookies(hostname) {
 }
 
 export async function getWebsiteConfig(hostname) {
-    if (!hostname) throw new Error('Hostname not defined, cant receive config')
+    if (!hostname) return null
 
     const storageKey = hostname + '_sdk'
 
@@ -126,39 +189,4 @@ export async function getCurrentTab() {
     const [tab] = await chrome.tabs.query({ active: true, lastFocusedWindow: true })
 
     return tab
-}
-
-export async function updateCspRules(hostname) {
-    const RULE_SET_ID = 1;
-
-    const rules = [
-        {
-            "id": RULE_SET_ID,
-            "priority": 1,
-            "action": {
-                "type": "modifyHeaders",
-                "responseHeaders": [
-                    {
-                        "header": "Content-Security-Policy",
-                        "operation": "remove"
-                    },
-                    {
-                        "operation": "remove",
-                        "header": "Content-Security-Policy-Report-Only"
-                    }
-                ]
-            },
-            "condition": {
-                "urlFilter": `*://${hostname}/*`,
-                "resourceTypes": [
-                    "main_frame",
-                    "sub_frame"
-                ]
-            }
-        }
-    ];
-
-    await chrome.declarativeNetRequest.updateSessionRules({ addRules: rules, removeRuleIds: [RULE_SET_ID] })
-
-    console.log('CSP rules removed for', hostname)
 }

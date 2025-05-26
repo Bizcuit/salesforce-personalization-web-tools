@@ -23,7 +23,8 @@ export default defineComponent({
       sdkUrl: "",
       isIgnoreCsp: true,
       isEnableThirdPartyCookies: true,
-      isAutoInitSitemap: true
+      isAutoInitSitemap: true,
+      isBlockEvergage: true
     }
   },
 
@@ -38,6 +39,7 @@ export default defineComponent({
         this.isIgnoreCsp = value?.isIgnoreCsp === false ? false : true
         this.isEnableThirdPartyCookies = value?.isEnableThirdPartyCookies === false ? false : true
         this.isAutoInitSitemap = value?.isAutoInitSitemap === false ? false : true
+        this.isBlockEvergage = value?.isBlockEvergage === false ? false : true
       })
   },
 
@@ -47,10 +49,9 @@ export default defineComponent({
         sdkUrl: this.sdkUrl,
         isIgnoreCsp: this.isIgnoreCsp,
         isEnableThirdPartyCookies: this.isEnableThirdPartyCookies,
-        isAutoInitSitemap: this.isAutoInitSitemap
+        isAutoInitSitemap: this.isAutoInitSitemap,
+        isBlockEvergage: this.isBlockEvergage
       })
-
-      injectSdk(this.sdkUrl)
     }
   }
 })
@@ -62,7 +63,7 @@ export default defineComponent({
       <h5>SDK Config for: {{ hostname }}</h5>
     </div>
     <div class="column has-text-right">
-      <button class="button is-primary is-small" @click="saveSdkConfig">Save & Inject SDK</button>
+      <button class="button is-primary is-small" @click="saveSdkConfig(); injectSdk(sdkUrl, '')">Save & Inject SDK</button>
     </div>
   </div>
 
@@ -80,9 +81,9 @@ export default defineComponent({
     <div class="buttons has-addons is-small">
       <button class="button is-small" disabled>Disable CSP rules</button>
       <button :class="{ 'button is-small': true, 'is-selected is-success': isIgnoreCsp }"
-        @click="isIgnoreCsp = true">Yes</button>
+        @click="isIgnoreCsp = true; saveSdkConfig()">Yes</button>
       <button :class="{ 'button is-small': true, 'is-selected is-danger': !isIgnoreCsp }"
-        @click="isIgnoreCsp = false">No</button>
+        @click="isIgnoreCsp = false; saveSdkConfig()">No</button>
     </div>
   </div>
 
@@ -90,9 +91,9 @@ export default defineComponent({
     <div class="buttons has-addons is-small">
       <button class="button is-small" disabled>Enable Third Party Cookies</button>
       <button :class="{ 'button is-small': true, 'is-selected is-success': isEnableThirdPartyCookies }"
-        @click="isEnableThirdPartyCookies = true">Yes</button>
+        @click="isEnableThirdPartyCookies = true; saveSdkConfig()">Yes</button>
       <button :class="{ 'button is-small': true, 'is-selected is-danger': !isEnableThirdPartyCookies }"
-        @click="isEnableThirdPartyCookies = false">No</button>
+        @click="isEnableThirdPartyCookies = false; saveSdkConfig()">No</button>
     </div>
   </div>
 
@@ -100,9 +101,19 @@ export default defineComponent({
     <div class="buttons has-addons is-small">
       <button class="button is-small" disabled>Auto Initialize Configured Sitemap</button>
       <button :class="{ 'button is-small': true, 'is-selected is-success': isAutoInitSitemap }"
-        @click="isAutoInitSitemap = true">Yes</button>
+        @click="isAutoInitSitemap = true; saveSdkConfig()">Yes</button>
       <button :class="{ 'button is-small': true, 'is-selected is-danger': !isAutoInitSitemap }"
-        @click="isAutoInitSitemap = false">No</button>
+        @click="isAutoInitSitemap = false; saveSdkConfig()">No</button>
+    </div>
+  </div>
+
+  <div class="buttons is-right">
+    <div class="buttons has-addons is-small">
+      <button class="button is-small" disabled>Block MCP (Evergage) Beacon</button>
+      <button :class="{ 'button is-small': true, 'is-selected is-success': isBlockEvergage }"
+        @click="isBlockEvergage = true; saveSdkConfig()">Yes</button>
+      <button :class="{ 'button is-small': true, 'is-selected is-danger': !isBlockEvergage }"
+        @click="isBlockEvergage = false; saveSdkConfig()">No</button>
     </div>
   </div>
 </template>
