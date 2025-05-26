@@ -47,14 +47,14 @@ export async function resetNetworksRules(){
 
 export async function displayExtensionState(isActive){
     if (isActive) {
-        chrome.action.setTitle({ title: `Configured for this domain` });
+        chrome.action.setTitle({ title: `SP Helper: Configured for this domain` });
 
         chrome.action.setIcon({
             path: { 128: 'icon-on.png' }
         });
     }
     else {
-        chrome.action.setTitle({ title: `Not configured` });
+        chrome.action.setTitle({ title: `SP Helper: Not configured` });
 
         chrome.action.setIcon({
             path: { 128: 'icon-off.png' }
