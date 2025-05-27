@@ -14,7 +14,8 @@
     "storage",
     "downloads",
     "webRequest",
-    "contentSettings"
+    "contentSettings",
+    "browsingData"
   ],
   "background": {
     "service_worker": "background.js",

@@ -167,8 +167,9 @@ export async function addEventsToStorage(hostname, events){
 }
 
 export function injectClientSDK(url) {
+    document.querySelector('meta[http-equiv="Content-Security-Policy"]')?.remove()
+    
     const nodeId = '_sf_datacloud_injected_websdk'
-
     const existingSdkNode = document.getElementById(nodeId)
 
     if (existingSdkNode) {

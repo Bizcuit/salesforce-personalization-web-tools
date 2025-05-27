@@ -27,6 +27,18 @@ export function generateSitemap(pageConfigs: Array<PageType>){
     let sitemap = `
         SalesforceInteractions.setLoggingLevel(100);
 
+        window.sfspCaptureEmail = function(value){
+            SalesforceInteractions.sendEvent({ 
+                interaction: { name: 'emailCapture' }, 
+                user: { 
+                    attributes: { 
+                        eventType: 'contactPointEmail', 
+                        email: value
+                    }
+                } 
+            })
+        }
+
         /* ========= START: PERSONALIZATION INITIALIZATION ========= */
         SalesforceInteractions.Personalization.Config.initialize({
             customFlickerDefenseConfig: {
@@ -304,7 +316,26 @@ export function generateSitemap(pageConfigs: Array<PageType>){
             };
 
             SalesforceInteractions.initSitemap(sitemapConfig);
-        });    
+        });
+
+
+
+        /* ============================================ */
+        /* ======= EMAIL CAPTURE: DELETE IN PROD ====== */
+        /* ============================================ */
+
+        SalesforceInteractions.cashDom('body').append(\`
+            <div style="position: fixed; bottom: 20px; right: 20px; padding: 10px 20px; background: white; border: solid 1px #DEDEDE; border-radius: 3px; box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19); z-index: 999999;">
+                <p>
+                    <input type="email" id="sfsp_bizcuit_injected_emailcapture" style="border: solid 1px #DEDEDE; padding: 7px 5px; border-radius: 3px; width: 200px; font-size: 12px; font-family: arial;" placeholder="eg: test@salesforce.com"/>
+                </p>
+                <p>
+                    <button style="border: solid 1px #DEDEDE; padding: 7px 5px; border-radius: 3px; width: 200px; background: #18ACEF; color: white; font-weight: bold; font-size: 12px; font-family: arial;" onclick="window.sfspCaptureEmail(document.getElementById('sfsp_bizcuit_injected_emailcapture').value); alert('Thank you!'); document.getElementById('sfsp_bizcuit_injected_emailcapture').value = ''">
+                        Introduce Yourself
+                    </button>
+                </p>
+            </div>
+        \`);
     `;
 
     return sitemap

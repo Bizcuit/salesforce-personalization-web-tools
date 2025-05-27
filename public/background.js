@@ -41,9 +41,7 @@ chrome.webRequest.onBeforeRequest.addListener(async (requestDetails) => {
 async function processTab(tab) {
     console.log('Processing tab', tab?.id, tab?.url)
 
-    if (!tab.url) {
-        return
-    }
+    if (!tab.url) return
 
     try {
         const hostname = await getHostnameByTab(tab)
@@ -55,22 +53,19 @@ async function processTab(tab) {
         if (!config) return
 
         if (config?.isIgnoreCsp) {
-            console.log("getCspDisableRule()", getCspDisableRule())
-            const rule = getCspDisableRule(hostname)
-
+            const ruleCsp = getCspDisableRule(hostname)
             await chrome.declarativeNetRequest.updateSessionRules({
-                addRules: [rule],
-                removeRuleIds: [rule.id]
+                addRules: [ruleCsp],
+                removeRuleIds: [ruleCsp.id]
             })
         }
 
         if (config?.isBlockEvergage) {
-            console.log("getEvgDisableRule()", getEvgDisableRule())
-            const rule = getEvgDisableRule()
+            const ruleEvg = getEvgDisableRule()
 
             await chrome.declarativeNetRequest.updateSessionRules({
-                addRules: [rule],
-                removeRuleIds: [rule.id]
+                addRules: [ruleEvg],
+                removeRuleIds: [ruleEvg.id]
             })
         }
 
@@ -88,11 +83,21 @@ async function processTab(tab) {
             if (sitemapConfig?.sitemap) {
                 await execScriptInTab(tab, (sitemap) => {
                     if (window.SalesforceInteractions) {
-                        eval(sitemap)
+                        try {
+                            eval(sitemap)
+                        }
+                        catch (err) {
+                            alert('ERROR:\n'
+                                + 'CSP rules block dynamic sitemap injection on this website.\n'
+                                + 'Add the code of the sitemap directly to Data Cloud\n'
+                                + 'and disable dynamic sitemap execution option')
+                        }
                     }
                 }, [sitemapConfig?.sitemap])
             }
         }
+
+        chrome.browsingData.removeServiceWorkers({})
     }
     catch (err) {
         console.log('Error processing tab', err)
