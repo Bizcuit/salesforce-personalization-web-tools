@@ -14,7 +14,8 @@ import { setStorageValue } from '@/classes/Utils'
 import { getStorageValue } from '@/classes/Utils'
 
 export default defineComponent({
-  props: {},
+  props: {
+  },
 
   data() {
     return {
@@ -26,6 +27,12 @@ export default defineComponent({
       currentPageType: this.newPageType(),
       currentSitemap: '',
       pageConfigs: [] as Array<PageType>
+    }
+  },
+
+  watch: {
+    hostname(newValue){
+
     }
   },
 

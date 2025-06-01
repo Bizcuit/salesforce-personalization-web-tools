@@ -1,6 +1,21 @@
-export interface SdkConfig {
+import { getStorageValue, setStorageValue } from "./Utils"
+
+export class SdkConfig {
     sdkUrl: string;
-    isIgnoreCsp: Boolean
+    isIgnoreCsp: boolean;
+    isEnableThirdPartyCookies: boolean;
+    isAutoInitSitemap: boolean;
+    isBlockEvergage: boolean;
+    isInjectEmailCapture: boolean;
+
+    constructor(storedValue: any){
+        this.sdkUrl = storedValue?.sdkUrl || ''
+        this.isIgnoreCsp = storedValue?.isIgnoreCsp === false || true
+        this.isEnableThirdPartyCookies = storedValue?.isEnableThirdPartyCookies === false || true
+        this.isAutoInitSitemap = storedValue?.isAutoInitSitemap === false || true
+        this.isBlockEvergage = storedValue?.isBlockEvergage === false || true
+        this.isInjectEmailCapture = storedValue?.isInjectEmailCapture || false
+    }
 }
 
 export interface PageMatch {
@@ -18,6 +33,60 @@ export interface PageType {
     pages: Array<PageMatch>
 }
 
+export class HostConfig {
+    private _hostname: string;
+    private _sdkConfig: SdkConfig;
+    private _sitemap: string;
+    private _events: Array<any>;
+    private _pageTypes: Array<PageType>;
+
+    public get hostname() {
+        return this._hostname
+    }
+
+    public get events(){
+        return this._events
+    }
+
+    public get sdkConfig(){
+        return this._sdkConfig
+    }
+
+    public get sitemap(){
+        this._sitemap = generateSitemap(this._pageTypes)
+        return this._sitemap
+    }
+
+    public static async loadConfig(hostname: string) {
+        const config = await getStorageValue(hostname)
+
+        if(config){
+            return new HostConfig(config)
+        }
+        
+        return null
+    }
+
+    public async saveConfig(){
+        const value: any = {
+            hostname: this._hostname,
+            sdkConfig: this.sdkConfig,
+            pageTypes: this._pageTypes ? JSON.stringify(this._pageTypes) : [],
+            sitemap: this.sitemap,
+            events: this.events ? JSON.stringify(this.events) : []
+        }
+
+        await setStorageValue(value.hostname, value)
+    }
+
+    constructor(storedValue: any){
+        this._hostname = storedValue?.hostname || 'demo.com' 
+        this._sdkConfig = storedValue?.sdkConfig || new SdkConfig(null)
+        this._pageTypes = storedValue?.pageTypes ? JSON.parse(storedValue.pageTypes) : []
+        this._events = storedValue?.events ? JSON.parse(storedValue.events) : []
+        this._sitemap = storedValue?.sitemap ? storedValue.sitemap : ''
+    }
+}
 
 export function generateSitemap(pageConfigs: Array<PageType>){
     let pagetypes = ''
@@ -317,25 +386,6 @@ export function generateSitemap(pageConfigs: Array<PageType>){
 
             SalesforceInteractions.initSitemap(sitemapConfig);
         });
-
-
-
-        /* ============================================ */
-        /* ======= EMAIL CAPTURE: DELETE IN PROD ====== */
-        /* ============================================ */
-
-        SalesforceInteractions.cashDom('body').append(\`
-            <div style="position: fixed; bottom: 20px; right: 20px; padding: 10px 20px; background: white; border: solid 1px #DEDEDE; border-radius: 3px; box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19); z-index: 999999;">
-                <p>
-                    <input type="email" id="sfsp_bizcuit_injected_emailcapture" style="border: solid 1px #DEDEDE; padding: 7px 5px; border-radius: 3px; width: 200px; font-size: 12px; font-family: arial;" placeholder="eg: test@salesforce.com"/>
-                </p>
-                <p>
-                    <button style="border: solid 1px #DEDEDE; padding: 7px 5px; border-radius: 3px; width: 200px; background: #18ACEF; color: white; font-weight: bold; font-size: 12px; font-family: arial;" onclick="window.sfspCaptureEmail(document.getElementById('sfsp_bizcuit_injected_emailcapture').value); alert('Thank you!'); document.getElementById('sfsp_bizcuit_injected_emailcapture').value = ''">
-                        Introduce Yourself
-                    </button>
-                </p>
-            </div>
-        \`);
     `;
 
     return sitemap
