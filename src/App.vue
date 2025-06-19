@@ -74,7 +74,7 @@ function downloadSitemap() {
     </div>
 
     <div class="block" v-if="tab == 'events' && hostConfig?.events">
-      <EventsList v-model="hostConfig.events"></EventsList>
+      <EventsList v-model="hostConfig.events" @refresh="hostConfig.getEvents()"></EventsList>
     </div>
 
   </div>

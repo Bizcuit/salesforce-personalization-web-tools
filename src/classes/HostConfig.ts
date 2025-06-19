@@ -11,13 +11,20 @@ export default class HostConfig {
     sitemap: string;
     events: Array<DataCloudEvent>;
 
+    public async getEvents(): Promise<Array<DataCloudEvent>> {
+        const events = await getStorageValue(this.hostname + '_events')
+
+        this.events = DataCloudEvent.initFromArray(events && Array.isArray(events) ? events : [])
+
+        return this.events
+    }
+
     public static async getConfig(hostname: string) {
         const hostConfig = await getStorageValue(hostname)
-        const events = await getStorageValue(hostname + '_events')
 
         const result = hostConfig ? new HostConfig(hostConfig) : new HostConfig({hostname: hostname})
 
-        result.events = DataCloudEvent.initFromArray(events && Array.isArray(events) ? events : [])
+        await result.getEvents()
 
         return result
     }
