@@ -48,13 +48,15 @@ export function getStorageValue(key: string) {
         return chrome.storage.local
             .get([key])
             .then(output => {
-                if(output) return JSON.parse(output[key])
+                if(output && output[key]) return JSON.parse(output[key])
                 return null 
             })
     else {
         const value = localStorage.getItem(key)
         if(value) return JSON.parse(value)
     }
+
+    return null
 }
 
 export function setStorageValue(key: string, value: object) {
@@ -64,7 +66,7 @@ export function setStorageValue(key: string, value: object) {
         return chrome.storage.local
             .set({ [key]: stringValue })
             .then(_ => {
-                console.log(`setStorageValue "${key}"`, stringValue);
+                console.log(`setStorageValue: ${key}`);
             });
     else 
         return localStorage.setItem(key, stringValue)

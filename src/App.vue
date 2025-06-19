@@ -1,37 +1,59 @@
 <script setup lang="ts">
-import SitemapConfig from './components/SitemapConfig.vue'
-import SdkConfigurator from './components/SdkConfigurator.vue'
-</script>
+import SitemapConfigEditor from './components/SitemapConfigEditor.vue'
+import SdkConfigEditor from './components/SdkConfigEditor.vue'
+import EventsList from './components/EventsList.vue'
 
-<script lang="ts">
-import { defineComponent } from 'vue'
-import { getCurrentUrl, launchWPM } from './classes/Utils';
-import EventsList from './components/EventsList.vue';
-import { HostConfig, SdkConfig } from './classes/Sitemap';
+import HostConfig from './classes/HostConfig'
+import { getCurrentUrl, launchWPM, downloadTextFile } from './classes/Utils';
+import { ref, watch, onMounted } from 'vue'
 
-export default defineComponent({
-  data() {
-    return {
-      tab: 'sitemap',
-      hostname: '',
-      config: new HostConfig(null)
-    }
-  },
-  mounted() {
-    getCurrentUrl()
-      .then(url => {
-        this.hostname = url?.hostname || 'demo.com'
-        return HostConfig.loadConfig(this.hostname)
-      })
-      .then(config => {
-        this.config = config || new HostConfig({hostname: this.hostname})
-      })
-  }
+const hostConfig = ref<HostConfig | null>(null);
+const tab = ref('sitemap')
+const hostname = ref('')
+const urlpath = ref('')
+
+async function getConfig() {
+  const url = await getCurrentUrl()
+  urlpath.value = url?.pathname || '/'
+  hostname.value = url?.hostname || 'salesforce.demo'
+
+  return await HostConfig.getConfig(hostname.value)
+}
+
+onMounted(async () => {
+  hostConfig.value = await getConfig()
 })
+
+watch(hostConfig, (newVal, oldVal) => {
+  if(oldVal && newVal){
+    console.log("hostConfig updated")
+    hostConfig.value?.saveConfig()
+  }
+}, {deep: true})
+
+function downloadSitemap() {
+  const sitemap = hostConfig.value?.sitemapConfig?.sitemap
+
+  if (sitemap) {
+    downloadTextFile(`sitemap_${hostname.value}.txt`, sitemap)
+  }
+}
+
 </script>
 
 <template>
+
+
   <div class="container">
+    <div class="columns is-mobile">
+      <div class="column">
+        <h5>Website: {{ hostname }}</h5>
+      </div>
+      <div class="column has-text-right">
+        <button class="button is-small" @click="downloadSitemap()">Download Sitemap</button>
+      </div>
+    </div>
+
     <div class="block">
       <div class="tabs is-right is-small">
         <ul>
@@ -43,16 +65,16 @@ export default defineComponent({
       </div>
     </div>
 
-    <div class="block" v-if="tab == 'sitemap'">
-      <SitemapConfig></SitemapConfig>
+    <div class="block" v-if="tab == 'sitemap' && hostConfig?.sitemapConfig">
+      <SitemapConfigEditor v-model="hostConfig.sitemapConfig" :urlpath="urlpath"></SitemapConfigEditor>
     </div>
 
-    <div class="block" v-if="tab == 'sdk'">
-      <SdkConfigurator v-bind="config.sdkConfig"></SdkConfigurator>
+    <div class="block" v-if="tab == 'sdk' && hostConfig?.sdkConfig">
+      <SdkConfigEditor v-model="hostConfig.sdkConfig"></SdkConfigEditor>
     </div>
 
-    <div class="block" v-if="tab == 'events'">
-      <!--EventsList></EventsList-->
+    <div class="block" v-if="tab == 'events' && hostConfig?.events">
+      <EventsList v-model="hostConfig.events"></EventsList>
     </div>
 
   </div>

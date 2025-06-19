@@ -76,16 +76,16 @@ export function enableThirdPartyCookies(hostname) {
     });
 }
 
-export async function getWebsiteConfig(hostname) {
+export async function getHostConfig(hostname) {
     if (!hostname) return null
 
-    const storageKey = hostname + '_sdk'
+    const configs = await chrome.storage.local.get([hostname])
 
-    const configs = await chrome.storage.local.get([storageKey])
+    if (!configs?.[hostname]) return null
 
-    if (!configs?.[storageKey]) return null
+    const config = typeof configs?.[hostname] === 'string' ? JSON.parse(configs?.[hostname]) : configs?.[hostname]
 
-    const config = typeof configs?.[storageKey] === 'string' ? JSON.parse(configs?.[storageKey]) : configs?.[storageKey]
+    console.log("getWebsiteConfig", config)
 
     return config
 }

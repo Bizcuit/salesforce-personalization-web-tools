@@ -1,90 +1,41 @@
-import { getStorageValue, setStorageValue } from "./Utils"
+export class PageMatch {
+    pagePath: string;
+    catalogId: string;
 
-export class SdkConfig {
-    sdkUrl: string;
-    isIgnoreCsp: boolean;
-    isEnableThirdPartyCookies: boolean;
-    isAutoInitSitemap: boolean;
-    isBlockEvergage: boolean;
-    isInjectEmailCapture: boolean;
-
-    constructor(storedValue: any){
-        this.sdkUrl = storedValue?.sdkUrl || ''
-        this.isIgnoreCsp = storedValue?.isIgnoreCsp === false || true
-        this.isEnableThirdPartyCookies = storedValue?.isEnableThirdPartyCookies === false || true
-        this.isAutoInitSitemap = storedValue?.isAutoInitSitemap === false || true
-        this.isBlockEvergage = storedValue?.isBlockEvergage === false || true
-        this.isInjectEmailCapture = storedValue?.isInjectEmailCapture || false
+    constructor(path: string, catalogId: string){
+        this.pagePath = path
+        this.catalogId = catalogId
     }
 }
 
-export interface PageMatch {
-    pagePath: string;
-    catalogId: string;
-}
-
-export interface PageType {
-    pageType: string;
+export class PageType {
+    pageTypeName: string;
     interactionName: string;
     eventType: string;
     catalogType: string;
-    isCustomEventType: Boolean;
-    hasCatalog: Boolean;
+    hasCatalog: boolean;
     pages: Array<PageMatch>
+
+    constructor(pageType: string){
+        this.pageTypeName = pageType
+        this.interactionName = pageType + ' view'
+        this.eventType = 'websiteEngagement'
+        this.catalogType = 'Product'
+        this.hasCatalog = true
+        this.pages = []
+    }
 }
 
-export class HostConfig {
-    private _hostname: string;
-    private _sdkConfig: SdkConfig;
-    private _sitemap: string;
-    private _events: Array<any>;
-    private _pageTypes: Array<PageType>;
-
-    public get hostname() {
-        return this._hostname
-    }
-
-    public get events(){
-        return this._events
-    }
-
-    public get sdkConfig(){
-        return this._sdkConfig
-    }
+export class SitemapConfig {
+    pageTypes: Array<PageType>;
 
     public get sitemap(){
-        this._sitemap = generateSitemap(this._pageTypes)
-        return this._sitemap
-    }
-
-    public static async loadConfig(hostname: string) {
-        const config = await getStorageValue(hostname)
-
-        if(config){
-            return new HostConfig(config)
-        }
-        
-        return null
-    }
-
-    public async saveConfig(){
-        const value: any = {
-            hostname: this._hostname,
-            sdkConfig: this.sdkConfig,
-            pageTypes: this._pageTypes ? JSON.stringify(this._pageTypes) : [],
-            sitemap: this.sitemap,
-            events: this.events ? JSON.stringify(this.events) : []
-        }
-
-        await setStorageValue(value.hostname, value)
+        console.log('generateSitemap')
+        return generateSitemap(this.pageTypes)
     }
 
     constructor(storedValue: any){
-        this._hostname = storedValue?.hostname || 'demo.com' 
-        this._sdkConfig = storedValue?.sdkConfig || new SdkConfig(null)
-        this._pageTypes = storedValue?.pageTypes ? JSON.parse(storedValue.pageTypes) : []
-        this._events = storedValue?.events ? JSON.parse(storedValue.events) : []
-        this._sitemap = storedValue?.sitemap ? storedValue.sitemap : ''
+        this.pageTypes = storedValue?.pageTypes ? storedValue?.pageTypes as Array<PageType> : []
     }
 }
 
@@ -378,13 +329,23 @@ export function generateSitemap(pageConfigs: Array<PageType>){
                 global: {
                     onActionEvent: (event) => { return event; }
                 },
-                pageTypeDefault: { name: "default" },
+                pageTypeDefault: { name: "default", "interaction": { "name": "default", "eventType": "webEngagement" } },
                 pageTypes: [
                   ${pagetypes}
                 ],
             };
 
             SalesforceInteractions.initSitemap(sitemapConfig);
+
+            /* === SPA Websites === */
+            let currentUrl = window.location.href;
+
+            setInterval(_ => {
+                if (currentUrl !== window.location.href) {
+                    currentUrl = window.location.href;
+                    SalesforceInteractions.reinit();
+                }
+            }, 500);
         });
     `;
 
@@ -394,7 +355,7 @@ export function generateSitemap(pageConfigs: Array<PageType>){
 function generatePageType(config: PageType){
     let result = `
                 {
-                    name: "${config.pageType}",
+                    name: "${config.pageTypeName}",
                     ${generateIsMatch(config)},
                     
                     interaction: { 
@@ -415,7 +376,7 @@ function generateCatalogObject(config: PageType){
 
     config.pages.forEach(p => {
         catalogIdSwitch += `
-                                    case "${p.pagePath}": return "${p.catalogId}"`
+                                    case "${p?.pagePath?.toLowerCase()}": return "${p.catalogId}"`
     })
 
     let result = `
@@ -438,7 +399,7 @@ function generateIsMatch(config: PageType){
 
     config.pages.forEach(p => {
         result += `
-                        "${p.pagePath}",`
+                        "${p?.pagePath?.toLowerCase()}",`
     })
 
     return `
