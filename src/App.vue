@@ -22,6 +22,7 @@ async function getConfig() {
 
 onMounted(async () => {
   hostConfig.value = await getConfig()
+  setActiveTab('')
 })
 
 watch(hostConfig, (newVal, oldVal) => {
@@ -38,6 +39,23 @@ function downloadSitemap() {
     downloadTextFile(`sitemap_${hostname.value}.txt`, sitemap)
   }
 }
+
+function setActiveTab(tabName: string){
+  if(!tabName){
+    /* if hostconfig doesn't exists and or SDK URL is not set, then set to SDK tab */
+    if(!hostConfig?.value?.sdkConfig?.sdkUrl){
+      tab.value = 'sdk'
+    }
+    else{
+      tab.value = 'sitemap'
+    }
+  }
+  else{
+    tab.value = tabName
+  }
+}
+
+setActiveTab('')
 
 </script>
 
@@ -57,9 +75,9 @@ function downloadSitemap() {
     <div class="block">
       <div class="tabs is-right is-small">
         <ul>
-          <li :class="{ 'is-active': tab == 'sitemap' }"><a @click="tab = 'sitemap'">Sitemap</a></li>
-          <li :class="{ 'is-active': tab == 'sdk' }"><a @click="tab = 'sdk'">SDK</a></li>
-          <li :class="{ 'is-active': tab == 'events' }"><a @click="tab = 'events'">Events</a></li>
+          <li :class="{ 'is-active': tab == 'sitemap' }"><a @click="setActiveTab('sitemap')">Sitemap</a></li>
+          <li :class="{ 'is-active': tab == 'sdk' }"><a @click="setActiveTab('sdk')">SDK</a></li>
+          <li :class="{ 'is-active': tab == 'events' }"><a @click="setActiveTab('events')">Events</a></li>
           <li class=""><a @click="launchWPM()">WPM ⏵</a></li>
         </ul>
       </div>

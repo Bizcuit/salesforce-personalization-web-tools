@@ -12,6 +12,6 @@ export default class SdkConfig {
         this.isEnableThirdPartyCookies = storedValue?.isEnableThirdPartyCookies === false || true
         this.isAutoInitSitemap = storedValue?.isAutoInitSitemap === false || true
         this.isBlockEvergage = storedValue?.isBlockEvergage === false || true
-        this.isInjectEmailCapture = storedValue?.isInjectEmailCapture || false
+        this.isInjectEmailCapture = storedValue?.isInjectEmailCapture === false || true
     }
 }
