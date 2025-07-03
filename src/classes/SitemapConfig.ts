@@ -20,7 +20,7 @@ export class PageType {
         this.pageTypeName = pageType
         this.interactionName = pageType + ' view'
         this.eventType = 'websiteEngagement'
-        this.catalogType = 'Product'
+        this.catalogType = ''
         this.hasCatalog = false
         this.pages = []
     }
