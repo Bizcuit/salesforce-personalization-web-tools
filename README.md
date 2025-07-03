@@ -24,10 +24,10 @@ Developer tools for Salesforce Data Cloud Web SDK and Salesforce Personalization
 - Select an Event Type that you would like to use for this Page Type. Select one of the predefined Event Type or provide a custom value
 - Select an Interaction Name that you would like to use for this Page Type. Default value will always be "{name of the Page Type} view"
 - Add current page to the Page Type by providing the URL path to the current page. URL path is a part of the URL that follows the domain name, but does not include URL parameters. A few examples:
-   URL: "https://abc.com/" => Path: "/"
-   URL: "https://abc.com/abc/" => Path: "/abc/"
-   URL: "https://abc.com/xyz/qwerty" => Path: "/xyz/qwerty"
-   URL: "https://abc.com/xyz/ddddd?param=value" => Path: "/xyz/ddddd"
+  - URL: "https://abc.com/" => Path: "/"
+  - URL: "https://abc.com/abc/" => Path: "/abc/"
+  - URL: "https://abc.com/xyz/qwerty" => Path: "/xyz/qwerty"
+  - URL: "https://abc.com/xyz/ddddd?param=value" => Path: "/xyz/ddddd"
 - If current Page Type is associated with some item (eg: a product landing page), then you can set the "Has Catalog" flag to YES and assign an item ID (eg: product id) to the page path below. You can also optionally set the item type next to the "Has Catalog" flag
 
 ## Using the Sitemap:
